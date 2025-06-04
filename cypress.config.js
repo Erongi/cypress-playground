@@ -16,7 +16,6 @@ module.exports = defineConfig({
   },
   env: {
     TEST_MS_USERNAME: process.env.CYPRESS_TEST_MS_USERNAME,
-    TEST_MS_PASSWORD: process.env.CYPRESS_TEST_MS_PASSWORD,
     MY_DOMAIN: process.env.MY_DOMAIN,
   },
 });
