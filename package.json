@@ -1,0 +1,17 @@
+{
+  "name": "cypress-playground",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cypress": "^14.4.0",
+    "dotenv": "^16.5.0"
+  }
+}
