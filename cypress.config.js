@@ -4,7 +4,7 @@ const { MicrosoftSocialLogin } = require("cypress-social-logins").plugins;
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: process.env.MY_DOMAIN,
+    baseUrl: process.env.CYPRESS_MY_DOMAIN || "http://localhost:3000",
     supportFile: false,
     setupNodeEvents(on, config) {
       on("task", {
@@ -16,6 +16,6 @@ module.exports = defineConfig({
   },
   env: {
     TEST_MS_USERNAME: process.env.CYPRESS_TEST_MS_USERNAME,
-    MY_DOMAIN: process.env.MY_DOMAIN,
+    MY_DOMAIN: process.env.CYPRESS_MY_DOMAIN,
   },
 });
