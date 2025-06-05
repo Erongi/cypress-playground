@@ -60,11 +60,13 @@ describe("Create Group-Activity and activities", () => {
     // Wait for the Select button to be enabled, then click it
     cy.contains("button", "Select").should("not.be.disabled").click();
 
-    // Wait for create activities
-    cy.wait(1000);
+    // Then wait for the table rows
+    cy.get('tbody[data-rfd-droppable-id="droppable"] tr[tabindex]', {
+      timeout: 10000,
+    }).should("have.length.greaterThan", 0);
 
     // loop set activity setting
-    cy.get('tbody[data-rfd-droppable-id="droppable"] tr[tabindex]').then(
+    cy.get(`tbody[data-rfd-droppable-id="droppable"] tr[tabindex]`).then(
       ($rows) => {
         Cypress.$($rows).each((index, row) => {
           cy.wrap(row)
