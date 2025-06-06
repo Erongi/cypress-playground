@@ -2,6 +2,10 @@ describe("Edit Setting Activity", () => {
   it("should login with Microsoft redirect", () => {
     const username = Cypress.env("TEST_MS_USERNAME");
     const timestamp = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const skip = 22;
+    const groupActivityId = 3607;
+    const questionLengthPerActivity = 9;
+    const answerLength = 50;
 
     cy.visit("/en/login");
 
@@ -14,7 +18,7 @@ describe("Edit Setting Activity", () => {
       "be.visible"
     );
 
-    cy.visit("/en/group-activity/v2/edit/?id=3535");
+    cy.visit(`/en/group-activity/v2/edit/?id=${groupActivityId}`);
 
     cy.wait(5000);
 
@@ -22,6 +26,10 @@ describe("Edit Setting Activity", () => {
     cy.get('tbody[data-rfd-droppable-id="droppable"] tr[tabindex]').then(
       ($rows) => {
         Cypress.$($rows).each((index, row) => {
+          //skip in case error
+          if (index < skip) {
+            return true; // Skip this iteration
+          }
           cy.wrap(row)
             .contains("button", "Questions - Answers")
             .should("not.be.disabled")
@@ -52,40 +60,72 @@ describe("Edit Setting Activity", () => {
               });
             });
 
-          // Click the "Add Options" button 50 times
-          for (let i = 0; i < 2; i++) {
-            cy.get("button.chakra-button")
-              .contains("Add Options")
-              .should("not.be.disabled") // ensure button is clickable
-              .click();
+          if (index === 0) {
+            // Click the "Add Options" button 50 times
+            for (let i = 0; i < answerLength - 2; i++) {
+              cy.get("button.chakra-button")
+                .contains("Add Options")
+                .should("not.be.disabled") // ensure button is clickable
+                .click();
+            }
+            // Loop add all answer
+            cy.get("div.flex.flex-col.w-full.gap-3")
+              .find("i.ic-add-circle-solid")
+              .each(($option) => {
+                cy.wrap($option).click();
+                cy.contains(
+                  'section[role="dialog"] span.text-t2-semi-bold',
+                  "Answer List"
+                )
+                  .first()
+                  .should("be.visible")
+                  .then(($span) => {
+                    // get the closest section from the span and log it
+                    const $section = $span.closest('section[role="dialog"]');
+
+                    // wrap the section to continue Cypress commands within it
+                    cy.wrap($section).within(() => {
+                      cy.get("tbody tr").first().click();
+
+                      cy.get("footer").contains("button", "Select").click();
+                    });
+                  });
+              });
+          } else {
+            cy.get("button.chakra-button").contains("Change template").click();
+            cy.contains("span.truncate.font-sans", "Date").click();
+            cy.get("footer").contains("button", "Select").click();
+
+            cy.contains("p.font-bold", `Question 1`) // Find the <p> tag that directly contains "Question 2" (assuming "font-bold" is unique for these titles)
+              .closest("div.border.rounded-md.w-full.mb-2.flex.flex-col") // Traverse up to the main question container div. Ensure these classes are consistent for all question blocks.
+              .find("input#title") // Find the input field within this specific question container (it has a consistent ID)
+              .siblings("button") // Get the sibling button(s) to that input
+              .contains("Select question") // Filter the siblings to find the one with the text "Select question"
+              .scrollIntoView() // Ensure the button is visible before clicking
+              .should("be.visible") // Assert that it is indeed visible
+              .click(); // Click the button
+
+            cy.contains(
+              'section[role="dialog"] span.text-t2-semi-bold',
+              "Question List"
+            )
+              .first()
+              .should("be.visible")
+              .then(($span) => {
+                // get the closest section from the span and log it
+                const $section = $span.closest('section[role="dialog"]');
+
+                // wrap the section to continue Cypress commands within it
+                cy.wrap($section).within(() => {
+                  cy.get("tbody tr").first().click();
+
+                  cy.get("footer").contains("button", "Select").click();
+                });
+              });
           }
 
-          // Loop add all answer
-          cy.get("div.flex.flex-col.w-full.gap-3")
-            .find("i.ic-add-circle-solid")
-            .each(($option) => {
-              cy.wrap($option).click();
-              cy.contains(
-                'section[role="dialog"] span.text-t2-semi-bold',
-                "Answer List"
-              )
-                .first()
-                .should("be.visible")
-                .then(($span) => {
-                  // get the closest section from the span and log it
-                  const $section = $span.closest('section[role="dialog"]');
-
-                  // wrap the section to continue Cypress commands within it
-                  cy.wrap($section).within(() => {
-                    cy.get("tbody tr").first().click();
-
-                    cy.get("footer").contains("button", "Select").click();
-                  });
-                });
-            });
-
-          // Click the "Add Options" button 50 times
-          for (let i = 0; i < 2; i++) {
+          // loop add new question
+          for (let i = 0; i < questionLengthPerActivity - 1; i++) {
             cy.get("header.chakra-modal__header")
               .contains("button", "Add Questions")
               .click();
@@ -96,9 +136,6 @@ describe("Edit Setting Activity", () => {
             cy.contains("span.truncate.font-sans", "Date").click();
 
             cy.get("footer").contains("button", "Select").click();
-
-            //wait create question
-            cy.wait(3000);
 
             cy.contains("p.font-bold", `Question ${i + 2}`) // Find the <p> tag that directly contains "Question 2" (assuming "font-bold" is unique for these titles)
               .closest("div.border.rounded-md.w-full.mb-2.flex.flex-col") // Traverse up to the main question container div. Ensure these classes are consistent for all question blocks.
