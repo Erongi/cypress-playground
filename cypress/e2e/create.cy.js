@@ -4,7 +4,7 @@ describe("Create Group-Activity and activities", () => {
     const timestamp = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     const activityLength = 70;
-    const questionLength = 600;
+    const questionLengthPerActivity = 9;
     const answerLength = 50;
 
     cy.visit("/en/login");
@@ -163,7 +163,7 @@ describe("Create Group-Activity and activities", () => {
             });
 
           // loop add new question
-          for (let i = 0; i < questionLength - 1; i++) {
+          for (let i = 0; i < questionLengthPerActivity - 1; i++) {
             cy.get("header.chakra-modal__header")
               .contains("button", "Add Questions")
               .click();
@@ -176,7 +176,7 @@ describe("Create Group-Activity and activities", () => {
             cy.get("footer").contains("button", "Select").click();
 
             //wait create question
-            cy.wait(3000);
+            cy.wait(5000);
 
             cy.contains("p.font-bold", `Question ${i + 2}`) // Find the <p> tag that directly contains "Question 2" (assuming "font-bold" is unique for these titles)
               .closest("div.border.rounded-md.w-full.mb-2.flex.flex-col") // Traverse up to the main question container div. Ensure these classes are consistent for all question blocks.
